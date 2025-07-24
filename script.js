@@ -21,13 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initFaceDetection() {
     try {
-        // Muat model face-api.js
+        // Tambahkan model ageNet
         await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.faceRecognitionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.ageGenderNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+            faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+            faceapi.nets.ageGenderNet.loadFromUri('/models') // Model baru untuk deteksi usia
         ]);
         
         startVideo();
@@ -38,29 +38,11 @@ async function initFaceDetection() {
     }
 }
 
-// Fungsi untuk memulai video (sama seperti sebelumnya)
-function startVideo() {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            const video = document.getElementById('video');
-            video.srcObject = stream;
-            video.onloadedmetadata = () => {
-                video.play();
-                detectFaces();
-            };
-        })
-        .catch(err => {
-            console.error("Error accessing camera: ", err);
-            document.getElementById('greeting').textContent = 
-                "Error: Kamera tidak dapat diakses. Pastikan Anda memberikan izin kamera.";
-        });
-}
-
-// Fungsi untuk mendeteksi wajah (sama seperti sebelumnya)
 function detectFaces() {
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const greeting = document.getElementById('greeting');
+    const agePrediction = document.getElementById('agePrediction');
     const displaySize = { width: video.width, height: video.height };
     
     faceapi.matchDimensions(canvas, displaySize);
@@ -69,7 +51,7 @@ function detectFaces() {
         const detections = await faceapi.detectAllFaces(
             video, 
             new faceapi.TinyFaceDetectorOptions()
-        ).withFaceLandmarks().withFaceExpressions().withAgeAndGender(); 
+        ).withFaceLandmarks().withFaceExpressions().withAgeAndGender(); // Tambahkan age and gender detection
         
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -78,23 +60,24 @@ function detectFaces() {
         faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
         
         if (detections.length > 0) {
+            // Deteksi ekspresi (sebelumnya)
             const expressions = detections[0].expressions;
             const dominantExpression = Object.entries(expressions)
                 .reduce((a, b) => a[1] > b[1] ? a : b)[0];
-
-                    // Deteksi usia dan gender
+            
+            // Deteksi usia dan gender
             const age = Math.round(detections[0].age);
             const gender = detections[0].gender;
             const genderText = gender === 'male' ? 'Laki-laki' : 'Perempuan';
-                
+            
             const greetings = {
-                'happy': 'Hai! Senang melihat Anda tersenyum! 😊',
-                'sad': 'Jangan sedih, semuanya akan baik-baik saja. 😢',
-                'angry': 'Tenang ya, jangan marah-marah. 😠',
-                'fearful': 'Jangan takut, ini hanya aplikasi sederhana. 😨',
-                'disgusted': 'Ada yang tidak Anda sukai? 😖',
-                'surprised': 'Wah, terkejut ya? 😲',
-                'neutral': 'Halo! Selamat datang di aplikasi deteksi wajah. 😐'
+                'happy': `Hai ${genderText}! Senang melihat Anda tersenyum! 😊`,
+                'sad': `${genderText}, jangan sedih, semuanya akan baik-baik saja. 😢`,
+                'angry': `Tenang ya ${genderText}, jangan marah-marah. 😠`,
+                'fearful': `Jangan takut ${genderText}, ini hanya aplikasi sederhana. 😨`,
+                'disgusted': `Ada yang tidak Anda sukai ${genderText}? 😖`,
+                'surprised': `Wah ${genderText}, terkejut ya? 😲`,
+                'neutral': `Halo ${genderText}! Selamat datang. 😐`
             };
             
             greeting.textContent = greetings[dominantExpression] || greetings['neutral'];
