@@ -1,12 +1,43 @@
-// Muat model face-api.js terlebih dahulu
-Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-    faceapi.nets.faceExpressionNet.loadFromUri('/models')
-]).then(startVideo);
+// Tambahkan event listener untuk menunggu library siap
+document.addEventListener('DOMContentLoaded', () => {
+    // Cek setiap 100ms apakah faceapi sudah terdefinisi
+    const checkFaceAPI = setInterval(() => {
+        if (typeof faceapi !== 'undefined') {
+            clearInterval(checkFaceAPI);
+            initFaceDetection();
+        }
+    }, 100);
 
-// Fungsi untuk memulai video
+    // Timeout setelah 10 detik jika library gagal dimuat
+    setTimeout(() => {
+        clearInterval(checkFaceAPI);
+        if (typeof faceapi === 'undefined') {
+            console.error("Gagal memuat face-api.js");
+            document.getElementById('greeting').textContent = 
+                "Error: Aplikasi tidak dapat dimuat. Silahkan refresh halaman.";
+        }
+    }, 10000);
+});
+
+async function initFaceDetection() {
+    try {
+        // Muat model face-api.js
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+            faceapi.nets.faceExpressionNet.loadFromUri('/models')
+        ]);
+        
+        startVideo();
+    } catch (error) {
+        console.error("Error loading models:", error);
+        document.getElementById('greeting').textContent = 
+            "Error: Gagal memuat model deteksi wajah.";
+    }
+}
+
+// Fungsi untuk memulai video (sama seperti sebelumnya)
 function startVideo() {
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
@@ -24,7 +55,7 @@ function startVideo() {
         });
 }
 
-// Fungsi untuk mendeteksi wajah
+// Fungsi untuk mendeteksi wajah (sama seperti sebelumnya)
 function detectFaces() {
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
