@@ -27,7 +27,7 @@ async function initFaceDetection() {
             faceapi.nets.faceLandmark68Net.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceRecognitionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.ageGenderNet.loadFromUri('https://jimswk.github.io/cameradetect/models') // Model baru untuk deteksi usia
+            faceapi.nets.ageGenderNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights') // Model baru untuk deteksi usia
         ]);
         
         startVideo();
