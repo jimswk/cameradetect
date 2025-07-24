@@ -1,22 +1,19 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deteksi Wajah - Selamat Datang</title>
+    <title>Deteksi Wajah</title>
     <link rel="stylesheet" href="style.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
     <h1>Selamat Datang!</h1>
-
     <div class="video-container">
-        <video id="video" width="640" height="480" autoplay muted></video>
-        <canvas id="overlayCanvas" width="640" height="480"></canvas>
+        <video id="video" autoplay muted></video>
+        <canvas id="overlayCanvas"></canvas>
     </div>
-
     <div id="status" class="message">Menunggu akses kamera...</div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
