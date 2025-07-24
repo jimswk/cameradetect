@@ -1,67 +1,71 @@
 const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const context = canvas.getContext('2d');
 const statusDiv = document.getElementById('status');
 
-let lastFrameData = null; // Menyimpan data piksel dari frame sebelumnya
-const threshold = 30; // Ambang batas perubahan piksel untuk mendeteksi gerakan
-const minPixelsChanged = 500; // Jumlah minimum piksel yang berubah untuk dianggap sebagai gerakan
+// Path ke folder models yang sudah Anda download
+const MODEL_URL = '/models'; // Pastikan path ini benar!
 
-// Fungsi untuk mendapatkan akses kamera
-async function setupCamera() {
+// Muat semua model yang diperlukan sebelum memulai deteksi
+Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL), // Untuk deteksi wajah yang cepat
+    // faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL), // Alternatif untuk deteksi wajah (lebih besar tapi bisa lebih akurat)
+    // faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL), // Opsional: Untuk landmark wajah (mata, hidung, mulut)
+    // faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL) // Opsional: Untuk pengenalan wajah
+]).then(startVideo); // Setelah model dimuat, mulai video
+
+async function startVideo() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
-        statusDiv.textContent = 'Kamera aktif. Mengesan pergerakan...';
         video.play();
+        statusDiv.textContent = 'Kamera aktif. Menunggu wajah terkesan...';
         video.onloadedmetadata = () => {
-            // Setelah video dimuat, mulai proses deteksi
-            requestAnimationFrame(detectMotion);
+            // Setelah video siap, mulai deteksi wajah
+            detectFaces();
         };
     } catch (err) {
         statusDiv.textContent = 'Gagal mengakses kamera. Pastikan Anda mengizinkan akses kamera.';
-        statusDiv.classList.add('error'); // Tambahkan kelas error jika ada
+        statusDiv.classList.add('error');
         console.error('Error accessing camera:', err);
     }
 }
 
-// Fungsi deteksi gerakan
-function detectMotion() {
-    // Pastikan video sudah siap dan dimainkan
-    if (video.paused || video.ended) {
-        requestAnimationFrame(detectMotion);
-        return;
-    }
+let faceDetected = false; // Flag untuk melacak apakah wajah sudah terdeteksi
+let detectionInterval; // Variabel untuk menyimpan interval
 
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const currentFrameData = context.getImageData(0, 0, canvas.width, canvas.height).data;
+function detectFaces() {
+    // Jalankan deteksi wajah setiap 100ms (10 kali per detik)
+    detectionInterval = setInterval(async () => {
+        // Mendeteksi semua wajah dalam video
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions());
+        // Jika Anda menggunakan model ssdMobilenetv1, gunakan:
+        // const detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options());
 
-    if (lastFrameData) {
-        let changedPixels = 0;
-        // Kita hanya akan memeriksa setiap beberapa piksel untuk efisiensi
-        for (let i = 0; i < currentFrameData.length; i += 4 * 10) { // Lewati 10 piksel
-            const rDiff = Math.abs(currentFrameData[i] - lastFrameData[i]);
-            const gDiff = Math.abs(currentFrameData[i + 1] - lastFrameData[i + 1]);
-            const bDiff = Math.abs(currentFrameData[i + 2] - lastFrameData[i + 2]);
-
-            // Jika perbedaan warna (rata-rata RGB) melebihi ambang batas
-            if ((rDiff + gDiff + bDiff) / 3 > threshold) {
-                changedPixels++;
+        if (detections.length > 0) {
+            // Wajah terdeteksi!
+            if (!faceDetected) { // Hanya update jika sebelumnya tidak ada wajah
+                statusDiv.textContent = 'Selamat datang!';
+                statusDiv.classList.add('welcome');
+                faceDetected = true;
+                console.log('Wajah terdeteksi!');
+            }
+        } else {
+            // Tiada wajah terdeteksi
+            if (faceDetected) { // Hanya update jika sebelumnya ada wajah
+                statusDiv.textContent = 'Tiada wajah terkesan.';
+                statusDiv.classList.remove('welcome');
+                faceDetected = false;
+                console.log('Wajah hilang.');
             }
         }
-
-        if (changedPixels > minPixelsChanged) {
-            statusDiv.textContent = 'PERGERAKAN DIKESAN!';
-            statusDiv.classList.add('detected');
-        } else {
-            statusDiv.textContent = 'Tiada pergerakan.';
-            statusDiv.classList.remove('detected');
-        }
-    }
-
-    lastFrameData = currentFrameData;
-    requestAnimationFrame(detectMotion); // Lanjutkan deteksi di frame berikutnya
+    }, 100); // Deteksi setiap 100 milidetik
 }
 
-// Mulai setup kamera saat halaman dimuat
-setupCamera();
+// Hentikan interval deteksi ketika halaman ditutup atau dinavigasi
+window.addEventListener('beforeunload', () => {
+    if (detectionInterval) {
+        clearInterval(detectionInterval);
+    }
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+});
