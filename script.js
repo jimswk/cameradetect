@@ -27,6 +27,7 @@ async function initFaceDetection() {
             faceapi.nets.faceLandmark68Net.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceRecognitionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
+            faceapi.nets.ageGenderNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
         ]);
         
         startVideo();
@@ -68,7 +69,7 @@ function detectFaces() {
         const detections = await faceapi.detectAllFaces(
             video, 
             new faceapi.TinyFaceDetectorOptions()
-        ).withFaceLandmarks().withFaceExpressions();
+        ).withFaceLandmarks().withFaceExpressions().withAgeAndGender(); 
         
         const resizedDetections = faceapi.resizeResults(detections, displaySize);
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
@@ -80,7 +81,12 @@ function detectFaces() {
             const expressions = detections[0].expressions;
             const dominantExpression = Object.entries(expressions)
                 .reduce((a, b) => a[1] > b[1] ? a : b)[0];
-            
+
+                    // Deteksi usia dan gender
+            const age = Math.round(detections[0].age);
+            const gender = detections[0].gender;
+            const genderText = gender === 'male' ? 'Laki-laki' : 'Perempuan';
+                
             const greetings = {
                 'happy': 'Hai! Senang melihat Anda tersenyum! 😊',
                 'sad': 'Jangan sedih, semuanya akan baik-baik saja. 😢',
@@ -92,8 +98,17 @@ function detectFaces() {
             };
             
             greeting.textContent = greetings[dominantExpression] || greetings['neutral'];
+            agePrediction.textContent = `Usia: ${age} tahun (${genderText})`;
+            
+            // Gambar informasi usia di canvas
+            new faceapi.draw.DrawTextField(
+                [`${age} tahun`, `${genderText}`],
+                detections[0].detection.box.bottomRight
+            ).draw(canvas);
+            
         } else {
             greeting.textContent = 'Silahkan hadapkan wajah Anda ke kamera';
+            agePrediction.textContent = 'Usia: -';
         }
     }, 100);
 }
