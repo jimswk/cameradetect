@@ -3,80 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Detection Greeting</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        #video {
-            border: 2px solid #333;
-            border-radius: 8px;
-        }
-        #greeting {
-            margin-top: 20px;
-            font-size: 24px;
-            color: #333;
-            text-align: center;
-        }
-    </style>
+    <title>Deteksi Wajah dengan Ucapan</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <video id="video" width="640" height="480" autoplay></video>
-    <div id="greeting">Mencari wajah...</div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <div class="container">
+        <h1>Deteksi Wajah</h1>
+        <div class="video-container">
+            <video id="video" width="640" height="480" autoplay></video>
+            <canvas id="canvas" width="640" height="480"></canvas>
+        </div>
+        <div id="greeting" class="greeting">Silahkan hadapkan wajah Anda ke kamera</div>
+    </div>
+    <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script>
-        async function setupCamera() {
-            const video = document.getElementById('video');
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-                return new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        resolve(video);
-                    };
-                });
-            } catch (err) {
-                console.error("Error accessing camera:", err);
-                document.getElementById('greeting').innerText = "Tidak dapat mengakses kamera.";
-            }
-        }
-
-        async function loadFaceApi() {
-            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/');
-        }
-
-        async function detectFaces(video) {
-            const greetingElement = document.getElementById('greeting');
-            
-            setInterval(async () => {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-                
-                if (detections.length > 0) {
-                    greetingElement.innerText = "Selamat Datang! Wajah dikesan!";
-                } else {
-                    greetingElement.innerText = "Mencari wajah...";
-                }
-            }, 1000);
-        }
-
-        async function main() {
-            await loadFaceApi();
-            const video = await setupCamera();
-            video.play();
-            detectFaces(video);
-        }
-
-        main();
-    </script>
 </body>
 </html>
