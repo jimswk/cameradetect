@@ -23,10 +23,10 @@ async function initFaceDetection() {
     try {
         // Muat model face-api.js
         await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-            faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-            faceapi.nets.faceExpressionNet.loadFromUri('/models')
+            faceapi.nets.tinyFaceDetector.loadFromUri('https://jimswk.github.io/cameradetect/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('https://jimswk.github.io/cameradetect/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
+            faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
         ]);
         
         startVideo();
