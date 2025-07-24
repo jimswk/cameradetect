@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deteksi Gerakan Kamera</title>
+    <title>Deteksi Wajah - Selamat Datang</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
-    <h1>Deteksi Gerakan Kamera Sederhana</h1>
+    <h1>Selamat Datang!</h1>
 
-    <video id="video" width="640" height="480" autoplay muted></video>
-    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <div class="video-container">
+        <video id="video" width="640" height="480" autoplay muted></video>
+        <canvas id="overlayCanvas" width="640" height="480"></canvas>
+    </div>
+
     <div id="status" class="message">Menunggu akses kamera...</div>
 
     <script src="script.js"></script>
