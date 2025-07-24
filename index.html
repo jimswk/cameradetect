@@ -6,7 +6,7 @@
     <title>Deteksi Wajah dengan Ucapan</title>
     <link rel="stylesheet" href="style.css">
     <!-- Pindahkan ke sini dan tambahkan async -->
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js" async></script>
+    <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -16,8 +16,6 @@
             <canvas id="canvas" width="640" height="480"></canvas>
         </div>
         <div id="greeting" class="greeting">Silahkan hadapkan wajah Anda ke kamera</div>
-        <!-- Tambahkan elemen untuk menampilkan umur -->
-        <div id="agePrediction" class="prediction">Usia: -</div>
     </div>
     <script src="script.js"></script>
 </body>
