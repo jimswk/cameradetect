@@ -26,7 +26,7 @@ async function initFaceDetection() {
             faceapi.nets.tinyFaceDetector.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceLandmark68Net.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.faceRecognitionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
-            faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
+            faceapi.nets.faceExpressionNet.loadFromUri('https://jimswk.github.io/cameradetect/models'),
             faceapi.nets.ageGenderNet.loadFromUri('https://jimswk.github.io/cameradetect/models')
         ]);
         
